@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Dashboard ดัชนีความร้อน (Heat Index) แบบเรียลไทม์ สำหรับโรงแยกก๊าซ ปตท. จังหวัดระยอง พร้อมคำแนะนำด้านความปลอดภัยสำหรับผู้ปฏิบัติงาน">
+  <title>Heat Index Dashboard — โรงแยกก๊าซ ปตท. ระยอง</title>
+  <link rel="stylesheet" href="style.css">
+
+</head>
+<body>
+  <!-- Loading Overlay -->
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-spinner"></div>
+    <p class="loading-text">กำลังโหลดข้อมูลสภาพอากาศ...</p>
+  </div>
+
+  <div class="dashboard">
+    <!-- ========== HEADER ========== -->
+    <header class="header fade-in">
+      <div class="header__brand">
+        <img src="ptt-gsp-logo.png" alt="PTT GSP Logo" class="header__logo">
+        <div>
+          <h1 class="header__title">Heat Index Dashboard</h1>
+          <p class="header__subtitle">โรงแยกก๊าซธรรมชาติระยอง บริษัท ปตท. จำกัด (มหาชน)</p>
+        </div>
+      </div>
+      <div class="header__right">
+        <!-- Emergency Contact -->
+        <a href="tel:46123" class="emergency-btn" id="emergencyBtn">
+          <div class="emergency-btn__info">
+            <span class="emergency-btn__label">เหตุฉุกเฉิน โทร.</span>
+            <span class="emergency-btn__number"><span class="emergency-btn__icon">📞</span>46123</span>
+            <span class="emergency-btn__sub">สถานพยาบาลโรงแยกก๊าซฯ</span>
+          </div>
+        </a>
+        <div class="header__status">
+          <span class="header__time" id="currentTime">--:--:--</span>
+          <span class="header__api-status">
+            <span class="status-dot" id="statusDot"></span>
+            <span id="statusText">กำลังเชื่อมต่อ...</span>
+          </span>
+        </div>
+      </div>
+    </header>
+
+    <!-- ========== MAIN ROW: Heat Index | Temp+Humidity | Impacts+Recommendations ========== -->
+    <section class="main-row fade-in fade-in-delay-1" id="heroSection">
+
+      <!-- คอลัมน์ซ้าย: วันที่ + Heat Index -->
+      <div class="left-column">
+        <!-- วันที่ -->
+        <div class="card date-card">
+          <span class="date-card__icon">📅</span>
+          <span class="date-card__text" id="currentDate">--</span>
+        </div>
+
+        <!-- Heat Index -->
+        <div class="card heat-index-card" id="heatIndexCard" data-level="normal">
+          <!-- Badge ด้านบน -->
+          <div class="heat-index__badge level-normal" id="heatBadge">
+            <span id="heatLevelIcon">✅</span>
+            <span>ดัชนีความร้อน</span>
+          </div>
+          <!-- ระดับตัวใหญ่ -->
+          <div class="hi-card__level" id="heatLevelText">กำลังคำนวณ...</div>
+          <!-- ค่า Heat Index -->
+          <div class="hi-card__value-row">
+            <span class="hi-card__value" id="currentHeatIndex">--</span>
+            <span class="hi-card__unit">°C</span>
+          </div>
+          <!-- Weather Info -->
+          <div class="hi-card__weather">
+            <div class="hi-card__weather-item">
+              <span id="weatherDesc">--</span>
+            </div>
+            <div class="hi-card__weather-item">
+              💨 <span id="windSpeed">--</span> · <span id="windDir">--</span>
+            </div>
+            <div class="hi-card__weather-item">
+              ☀️ UV: <span id="uvIndex">--</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2) อุณหภูมิ + ความชื้น ในช่องเดียว แบ่งซ้าย-ขวา -->
+      <div class="card temp-humidity-card">
+        <div class="th-stack">
+          <!-- บน: อุณหภูมิ -->
+          <div class="th-block">
+            <p class="th-block__label">🌡️ อุณหภูมิ</p>
+            <p class="th-block__value">
+              <span class="temp-value" id="currentTemp">--</span>
+              <span class="th-block__unit">°C</span>
+            </p>
+            <p class="th-block__extra" id="tempFeelLike">รู้สึกเหมือน --°C</p>
+          </div>
+          <!-- เส้นแบ่ง -->
+          <div class="th-stack-divider"></div>
+          <!-- ล่าง: ความชื้น -->
+          <div class="th-block">
+            <p class="th-block__label">💧 ความชื้นสัมพัทธ์</p>
+            <p class="th-block__value">
+              <span class="humidity-value" id="currentHumidity">--</span>
+              <span class="th-block__unit">%</span>
+            </p>
+            <p class="th-block__extra" id="dewPoint">จุดน้ำค้าง --°C</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3) ผลกระทบ + คำแนะนำ (แยกผู้ปฏิบัติงาน / หัวหน้างาน) -->
+      <div class="card recommendations-card" id="recommendationsPanel">
+        <div class="rec-top">
+          <div class="rec-impact" id="recImpact">
+            <p class="rec-section__title impact">⚠️ ผลกระทบ</p>
+            <ul class="rec-list" id="impactList">
+              <li>กำลังโหลด...</li>
+            </ul>
+          </div>
+        </div>
+        <div class="rec-bottom">
+          <div class="rec-role-section">
+            <p class="rec-section__title worker-title">👷 คำแนะนำสำหรับผู้ปฏิบัติงาน</p>
+            <ul class="rec-list" id="workerRecList">
+              <li>กำลังโหลด...</li>
+            </ul>
+          </div>
+          <div class="rec-role-divider"></div>
+          <div class="rec-role-section">
+            <p class="rec-section__title supervisor-title">👨‍💼 คำแนะนำสำหรับหัวหน้างาน</p>
+            <ul class="rec-list" id="supervisorRecList">
+              <li>กำลังโหลด...</li>
+            </ul>
+          </div>
+        </div>
+        <div class="rec-workrest" id="recWorkRest">
+          <!-- Dynamic work-rest schedule -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== FORECAST: แถบยาวแนวนอน ========== -->
+    <section class="card forecast-strip fade-in fade-in-delay-2">
+      <div class="card__header">
+        <span class="card__header-icon">📅</span>
+        พยากรณ์อากาศรายสัปดาห์
+      </div>
+      <div class="forecast-days" id="forecastDays">
+        <!-- Dynamic content filled by JS -->
+      </div>
+    </section>
+
+    <!-- ========== REFERENCE TABLE (เกณฑ์ NOAA) ========== -->
+    <section class="card fade-in fade-in-delay-3" style="margin-top: var(--space-lg);">
+      <div class="card__header">
+        <span class="card__header-icon">📖</span>
+        ตารางอ้างอิงระดับดัชนีความร้อน (เกณฑ์ NOAA)
+      </div>
+      <table class="ref-table">
+        <thead>
+          <tr>
+            <th>ดัชนีความร้อน</th>
+            <th>ระดับ</th>
+            <th>ข้อแนะนำสำหรับผู้ปฏิบัติงาน</th>
+            <th>ข้อแนะนำสำหรับหัวหน้างาน</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="level-indicator"><span class="level-dot caution"></span> 27.0 — 32.9°C</span></td>
+            <td>เฝ้าระวัง</td>
+            <td>ดื่มน้ำสะอาดบ่อยๆ ระหว่างวัน โดยไม่ต้องรอให้กระหายน้ำ ปฏิบัติงานได้ตามปกติ</td>
+            <td>หมั่นสังเกตอาการผู้ปฏิบัติงานในกลุ่มที่สวมใส่ PPE ปิดคลุมหรือกลุ่มใช้แรงงานหนัก</td>
+          </tr>
+          <tr>
+            <td><span class="level-indicator"><span class="level-dot warning"></span> 33.0 — 41.9°C</span></td>
+            <td>เตือนภัย</td>
+            <td>ดื่มน้ำอย่างน้อย 1 แก้วทุก 15 – 20 นาที และพักในร่มอย่างน้อย 5 นาทีทุก 1 ชั่วโมง</td>
+            <td>จัดพื้นที่พักระหว่างทำงานให้มีร่มเงาเพียงพอ และมีอากาศถ่ายเทสะดวก</td>
+          </tr>
+          <tr>
+            <td><span class="level-indicator"><span class="level-dot danger"></span> 42.0 — 51.9°C</span></td>
+            <td>อันตราย</td>
+            <td>ดื่มน้ำมากกว่า 1 แก้วทุก 15 นาที และให้พักในร่มอย่างน้อย 10 นาทีทุก 1 ชั่วโมง</td>
+            <td>จัดให้มีการสลับผู้ปฏิบัติงานเป็นระยะ และเฝ้าระวังผู้ปฏิบัติงานอย่างใกล้ชิด</td>
+          </tr>
+          <tr>
+            <td><span class="level-indicator"><span class="level-dot extreme"></span> ≥ 52°C</span></td>
+            <td>อันตรายมาก</td>
+            <td>ดื่มน้ำอย่างน้อย 1 แก้วทุก 10 – 15 นาที และพักในร่ม 30 นาทีทุก 1 ชั่วโมง</td>
+            <td>จัดหาเครื่องแต่งกายที่ระบายอากาศได้ดี และจัดให้จุดปฏิบัติงานกลางแจ้งมีร่มเงา</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ========== HOURLY TABLE ========== -->
+    <section class="card fade-in fade-in-delay-4" style="margin-top: var(--space-lg);">
+      <div class="card__header">
+        <span class="card__header-icon">⏱️</span>
+        รายละเอียดรายชั่วโมง (08:00 – 17:00 น.)
+      </div>
+      <div class="hourly-table-wrap">
+        <table class="hourly-table" id="hourlyTable">
+          <thead>
+            <tr>
+              <th>เวลา</th>
+              <th>Heat Index (°C)</th>
+              <th>ระดับ</th>
+              <th>อุณหภูมิ (°C)</th>
+              <th>ความชื้น (%)</th>
+            </tr>
+          </thead>
+          <tbody id="hourlyBody">
+            <!-- Dynamic content filled by JS -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ========== UPDATED TIME ========== -->
+    <div class="updated-time" id="updatedTime">
+      อัปเดตล่าสุด: กำลังโหลด...
+    </div>
+
+    <!-- ========== FOOTER ========== -->
+    <footer class="footer">
+      <p>Heat Index Dashboard — โรงแยกก๊าซธรรมชาติระยอง บริษัท ปตท. จำกัด (มหาชน)</p>
+      <p>ข้อมูลสภาพอากาศจาก <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo API</a> • อัปเดตอัตโนมัติทุก 15 นาที</p>
+      <p style="margin-top: 4px;">สูตรคำนวณ Heat Index ตามมาตรฐาน NOAA/NWS (Rothfusz Regression)</p>
+      <p style="margin-top: 4px;">เกณฑ์ดัชนีความร้อนอ้างอิงจาก <a href="https://www.osha.gov/heat-exposure/niosh" target="_blank" rel="noopener">OSHA-NIOSH Heat Safety Tool</a></p>
+    </footer>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
