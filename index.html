@@ -143,12 +143,21 @@
 
     <!-- ========== FORECAST: แถบยาวแนวนอน ========== -->
     <section class="card forecast-strip fade-in fade-in-delay-2">
-      <div class="card__header">
-        <span class="card__header-icon">📅</span>
-        พยากรณ์อากาศรายสัปดาห์
+      <div class="card__header" style="margin-bottom: var(--space-md); flex-wrap: wrap; justify-content: space-between; align-items: flex-end;">
+        <div style="display: flex; align-items: center; gap: var(--space-sm);">
+          <span class="card__header-icon">📅</span>
+          พยากรณ์อากาศรายสัปดาห์
+        </div>
+        <div style="font-size: 0.72rem; font-weight: 400; color: var(--text-muted); text-transform: none; letter-spacing: normal; text-align: right; line-height: 1.5;">
+          ข้อมูลสภาพอากาศจาก <a href="https://open-meteo.com/" target="_blank" rel="noopener" style="color: var(--text-accent); text-decoration: none;">Open-Meteo API</a> • อัปเดตอัตโนมัติทุก 15 นาที<br>
+          สูตรคำนวณ Heat Index ตามมาตรฐาน NOAA/NWS (Rothfusz Regression)
+        </div>
       </div>
       <div class="forecast-days" id="forecastDays">
         <!-- Dynamic content filled by JS -->
+      </div>
+      <div style="text-align: right; margin-top: var(--space-md); font-size: 0.8rem; font-weight: 400; color: var(--text-muted);">
+        🔴 คือ <b>ค่าดัชนีความร้อนคาดการณ์สูงสุด</b>
       </div>
     </section>
 
@@ -228,8 +237,6 @@
     <!-- ========== FOOTER ========== -->
     <footer class="footer">
       <p>Heat Index Dashboard — โรงแยกก๊าซธรรมชาติระยอง บริษัท ปตท. จำกัด (มหาชน)</p>
-      <p>ข้อมูลสภาพอากาศจาก <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo API</a> • อัปเดตอัตโนมัติทุก 15 นาที</p>
-      <p style="margin-top: 4px;">สูตรคำนวณ Heat Index ตามมาตรฐาน NOAA/NWS (Rothfusz Regression)</p>
       <p style="margin-top: 4px;">เกณฑ์ดัชนีความร้อนอ้างอิงจาก <a href="https://www.osha.gov/heat-exposure/niosh" target="_blank" rel="noopener">OSHA-NIOSH Heat Safety Tool</a></p>
     </footer>
   </div>
